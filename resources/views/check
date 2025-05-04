@@ -1,0 +1,38 @@
+for ($i = 0; $i < $productCount; $i++) {
+        if (!empty($productNames[$i])) {
+            $soDetail = Purchase_Order::where('id', $id)
+                ->where('product_name', $productNames[$i])
+                ->first();
+
+            if ($soDetail) {
+                $soDetail->qty = $qtys[$i];
+                $soDetail->updated_at = now();
+                $soDetail->save();
+            } else {
+                $soDetail = new so_details();
+                $soDetail->so_number = $id;
+                $soDetail->product_name = $productNames[$i];
+                $soDetail->product_code = $product_code[$i];
+                $soDetail->qty = $qtys[$i];
+                $soDetail->created_at = now();
+                $soDetail->updated_at = now();
+                $soDetail->save();
+            }
+
+         
+            $stock = stock::where('product_name', $productNames[$i])->first();
+            if ($stock) {
+                $quty1 = $stock->qty - $qtys[$i];
+                $stock->update(['qty' => $quty1]);
+            } else {
+                $soDetail = new so_details();
+                $soDetail->so_number = $id; 
+                $soDetail->product_name = $productNames[$i];
+                $soDetail->qty = $qtys[$i];
+                $soDetail->product_code = $product_code[$i];
+                $soDetail->created_at = now();
+                $soDetail->updated_at = now();
+                $soDetail->save();
+            }
+        }
+    }
